@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Switch, Alert } from 'react-native';
 
+import BaseScreen from '../components/BaseScreen';
+import { useCommands } from '../contexts/CommandContext';
+
 const suggestionsMock = [
   { id: 's1', text: '"Dim lights at 9PM"' },
   { id: 's2', text: '"Set temperature to 22°C"' },
@@ -21,96 +24,141 @@ const scenesMock = [
 export default function AutomationScreen() {
   const [routineEnabled, setRoutineEnabled] = useState(true);
   const [movieMode, setMovieMode] = useState(false);
+  const { executeCommand, history } = useCommands();
+
+  const recentHistory = history.slice(0, 3);
+
+  const handleRoutineToggle = (value) => {
+    setRoutineEnabled(value);
+    executeCommand({
+      type: 'ToggleRoutineCommand',
+      deviceId: 'routine:good-morning',
+      payload: { state: value ? 'on' : 'off' },
+    });
+  };
+
+  const handleMovieToggle = (value) => {
+    setMovieMode(value);
+    executeCommand({
+      type: 'ToggleSceneCommand',
+      deviceId: 'scene:movie-mode',
+      payload: { state: value ? 'on' : 'off' },
+    });
+  };
+
+  const handleActivateSecurity = () => {
+    executeCommand({
+      type: 'ActivateSecuritySceneCommand',
+      deviceId: 'scene:secure-night',
+      payload: { immediate: true },
+    });
+    Alert.alert('Bật chế độ bảo vệ', 'Đã kích hoạt mô phỏng');
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.powered}>Powered by</Text>
+    <BaseScreen title="Automation" contentStyle={styles.fullScreen}>
+      <View style={styles.container}>
+        <Text style={styles.powered}>Powered by</Text>
 
-      {/* Central glowing hub */}
-      <View style={styles.hubWrapper}>
-        <View style={styles.hubGlow} />
-        <View style={styles.hubCore}>
-          <Text style={styles.hubIcon}>⚙️</Text>
-        </View>
-        <View style={[styles.beam, styles.beamLeft]} />
-        <View style={[styles.beam, styles.beamTop]} />
-        <View style={[styles.beam, styles.beamRight]} />
-      </View>
-
-      {/* Left card: Voice Suggestions */}
-      <View style={[styles.card, styles.cardLeft]}>
-        <View style={styles.cardHeaderRow}>
-          <Text style={styles.cardIcon}>❓</Text>
-          <Text style={styles.cardTitle}>Voice Suggestions</Text>
-        </View>
-        {suggestionsMock.map((s) => (
-          <Pressable key={s.id} style={styles.itemRow} onPress={() => Alert.alert('Gợi ý', s.text)}>
-            <Text style={styles.itemText}>{s.text}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* Top card: Automation Logs */}
-      <View style={[styles.card, styles.cardTop]}>
-        <View style={styles.cardHeaderRow}>
-          <Text style={styles.cardIcon}>🕘</Text>
-          <Text style={styles.cardTitle}>Automation Logs</Text>
-        </View>
-        {logsMock.map((l) => (
-          <View key={l.id} style={styles.logRow}>
-            <Text style={styles.logTime}>{l.time}</Text>
-            <Text style={styles.logText}>{l.text}</Text>
+        {/* Central glowing hub */}
+        <View style={styles.hubWrapper}>
+          <View style={styles.hubGlow} />
+          <View style={styles.hubCore}>
+            <Text style={styles.hubIcon}>⚙️</Text>
           </View>
-        ))}
-      </View>
-
-      {/* Right card: Scene Recommendations */}
-      <View style={[styles.card, styles.cardRight]}>
-        <View style={styles.cardHeaderRow}>
-          <Text style={styles.cardIcon}>🧠</Text>
-          <Text style={styles.cardTitle}>Scene Recommendations</Text>
+          <View style={[styles.beam, styles.beamLeft]} />
+          <View style={[styles.beam, styles.beamTop]} />
+          <View style={[styles.beam, styles.beamRight]} />
         </View>
-        <View style={styles.sceneRow}>
-          {scenesMock.map((c) => (
-            <Pressable key={c.id} style={styles.sceneBtn} onPress={() => Alert.alert('Kích hoạt cảnh', c.name)}>
-              <Text style={styles.sceneIcon}>{c.icon}</Text>
-              <Text style={styles.sceneText}>{c.name}</Text>
+
+        {/* Left card: Voice Suggestions */}
+        <View style={[styles.card, styles.cardLeft]}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardIcon}>❓</Text>
+            <Text style={styles.cardTitle}>Voice Suggestions</Text>
+          </View>
+          {suggestionsMock.map((s) => (
+            <Pressable key={s.id} style={styles.itemRow} onPress={() => Alert.alert('Gợi ý', s.text)}>
+              <Text style={styles.itemText}>{s.text}</Text>
             </Pressable>
           ))}
         </View>
-      </View>
 
-      {/* Bottom area */}
-      <View style={styles.bottomRow}>
-        <View style={[styles.bottomCard, styles.bottomCardLeft]}>
-          <Text style={styles.bottomTitle}>Good Morning Routine</Text>
-          <Text style={styles.bottomSub}>Start your day with perfect ambiance</Text>
-          <View style={styles.bulletRow}><Text style={styles.bullet}>•</Text><Text style={styles.bulletText}>Blinds Open</Text></View>
-          <View style={styles.bulletRow}><Text style={styles.bullet}>•</Text><Text style={styles.bulletText}>Lights Warm</Text></View>
-          <View style={styles.bulletRow}><Text style={styles.bullet}>•</Text><Text style={styles.bulletText}>AC Temp Adjust</Text></View>
-          <View style={styles.bottomFooter}>
-            <Text style={styles.bottomFooterText}>Auto Activate at 7:00 AM</Text>
-            <Switch value={routineEnabled} onValueChange={(v) => setRoutineEnabled(v)} />
+        {/* Top card: Automation Logs */}
+        <View style={[styles.card, styles.cardTop]}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardIcon}>🕘</Text>
+            <Text style={styles.cardTitle}>Automation Logs</Text>
+          </View>
+          {logsMock.map((l) => (
+            <View key={l.id} style={styles.logRow}>
+              <Text style={styles.logTime}>{l.time}</Text>
+              <Text style={styles.logText}>{l.text}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Right card: Scene Recommendations */}
+        <View style={[styles.card, styles.cardRight]}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardIcon}>🧠</Text>
+            <Text style={styles.cardTitle}>Scene Recommendations</Text>
+          </View>
+          <View style={styles.sceneRow}>
+            {scenesMock.map((c) => (
+              <Pressable key={c.id} style={styles.sceneBtn} onPress={() => Alert.alert('Kích hoạt cảnh', c.name)}>
+                <Text style={styles.sceneIcon}>{c.icon}</Text>
+                <Text style={styles.sceneText}>{c.name}</Text>
+              </Pressable>
+            ))}
           </View>
         </View>
 
-        <View style={[styles.bottomCard, styles.bottomCardRight]}>
-          <View style={styles.rowBetween}>
-            <Text style={styles.bottomTitle}>Movie Mode</Text>
-            <Switch value={movieMode} onValueChange={(v) => setMovieMode(v)} />
+        {/* Bottom area */}
+        <View style={styles.bottomRow}>
+          <View style={[styles.bottomCard, styles.bottomCardLeft]}>
+            <Text style={styles.bottomTitle}>Good Morning Routine</Text>
+            <Text style={styles.bottomSub}>Start your day with perfect ambiance</Text>
+            <View style={styles.bulletRow}><Text style={styles.bullet}>•</Text><Text style={styles.bulletText}>Blinds Open</Text></View>
+            <View style={styles.bulletRow}><Text style={styles.bullet}>•</Text><Text style={styles.bulletText}>Lights Warm</Text></View>
+            <View style={styles.bulletRow}><Text style={styles.bullet}>•</Text><Text style={styles.bulletText}>AC Temp Adjust</Text></View>
+            <View style={styles.bottomFooter}>
+              <Text style={styles.bottomFooterText}>Auto Activate at 7:00 AM</Text>
+            <Switch value={routineEnabled} onValueChange={handleRoutineToggle} />
+            </View>
           </View>
-          <Text style={styles.bottomSub}>TV, lights dim, surround sound</Text>
 
-          <View style={styles.secureCard}>
-            <Text style={styles.secureTitle}>Secure House at Night</Text>
-            <Text style={styles.secureSub}>Enable security protocols, lock all doors, dim external lights</Text>
-            <Pressable style={styles.primaryBtn} onPress={() => Alert.alert('Bật chế độ bảo vệ', 'Đã kích hoạt mô phỏng') }>
-              <Text style={styles.primaryBtnText}>Activate Now</Text>
-            </Pressable>
+          <View style={[styles.bottomCard, styles.bottomCardRight]}>
+            <View style={styles.rowBetween}>
+              <Text style={styles.bottomTitle}>Movie Mode</Text>
+            <Switch value={movieMode} onValueChange={handleMovieToggle} />
+            </View>
+            <Text style={styles.bottomSub}>TV, lights dim, surround sound</Text>
+
+            <View style={styles.secureCard}>
+              <Text style={styles.secureTitle}>Secure House at Night</Text>
+              <Text style={styles.secureSub}>Enable security protocols, lock all doors, dim external lights</Text>
+            <Pressable style={styles.primaryBtn} onPress={handleActivateSecurity}>
+                <Text style={styles.primaryBtnText}>Activate Now</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
+      <View style={styles.historyCard}>
+        <Text style={styles.historyTitle}>Recent automations</Text>
+        {recentHistory.length === 0 ? (
+          <Text style={styles.historyEmpty}>No commands queued yet.</Text>
+        ) : (
+          recentHistory.map((item) => (
+            <View key={item.id} style={styles.historyRow}>
+              <Text style={styles.historyCommand}>{item.type}</Text>
+              <Text style={styles.historyStatus}>{item.status}</Text>
+            </View>
+          ))
+        )}
       </View>
-    </View>
+      </View>
+    </BaseScreen>
   );
 }
 
@@ -121,6 +169,9 @@ const textMuted = '#AEB7FF';
 const accent = '#6B7BFF';
 
 const styles = StyleSheet.create({
+  fullScreen: {
+    paddingHorizontal: 0,
+  },
   container: { flex: 1, backgroundColor: bg, alignItems: 'center', justifyContent: 'center' },
   powered: { position: 'absolute', top: 110, color: textMuted, fontSize: 12 },
 
@@ -155,7 +206,7 @@ const styles = StyleSheet.create({
   cardTop: { top: 80, right: 90 },
   cardRight: { right: 24, top: 240 },
 
-  bottomRow: { position: 'absolute', bottom: 24, left: 16, right: 16, flexDirection: 'row' },
+  bottomRow: { position: 'absolute', bottom: 170, left: 16, right: 16, flexDirection: 'row' },
   bottomCard: { flex: 1, backgroundColor: glass, borderRadius: 16, padding: 14 },
   bottomCardLeft: { marginRight: 10 },
   bottomCardRight: { marginLeft: 10 },
@@ -174,6 +225,27 @@ const styles = StyleSheet.create({
   secureSub: { color: textMuted, fontSize: 12, marginVertical: 6 },
   primaryBtn: { backgroundColor: accent, borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
   primaryBtnText: { color: 'white', fontWeight: '700' },
+  historyCard: {
+    position: 'absolute',
+    bottom: 24,
+    left: 16,
+    right: 16,
+    backgroundColor: '#1A1C2A',
+    borderRadius: 16,
+    padding: 16,
+  },
+  historyTitle: { color: textMain, fontWeight: '700', marginBottom: 10 },
+  historyEmpty: { color: textMuted, fontSize: 12 },
+  historyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#FFFFFF11',
+  },
+  historyCommand: { color: textMain, fontSize: 12 },
+  historyStatus: { color: textMuted, fontSize: 12, textTransform: 'capitalize' },
 });
 
 

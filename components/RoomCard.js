@@ -7,10 +7,21 @@ export default function RoomCard({ room, onToggleDevice, onAdjust }) {
   const hasAC = Boolean(devices.ac);
   const hasFan = Boolean(devices.fan);
 
+  const hasStaleDevice = Object.values(devices).some((device) => device?.isStale);
+
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{name}</Text>
-      <Text style={styles.icon}>{icon}</Text>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.title}>{name}</Text>
+          <Text style={styles.icon}>{icon}</Text>
+        </View>
+        {hasStaleDevice && (
+          <View style={styles.staleBadge}>
+            <Text style={styles.staleText}>⚠️ Stale</Text>
+          </View>
+        )}
+      </View>
 
       {light && (
         <View style={styles.section}>
@@ -93,8 +104,27 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 10,
   },
-  title: { fontSize: 20, color: 'white', fontWeight: '600', marginBottom: 8 },
-  icon: { fontSize: 36, alignSelf: 'center', marginBottom: 8 },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  title: { fontSize: 20, color: 'white', fontWeight: '600', marginBottom: 4 },
+  icon: { fontSize: 36 },
+  staleBadge: {
+    backgroundColor: '#FFD16622',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FFD16655',
+  },
+  staleText: {
+    color: '#FFD166',
+    fontSize: 11,
+    fontWeight: '600',
+  },
   section: {
     backgroundColor: '#FFFFFF22',
     borderRadius: 16,

@@ -2,18 +2,20 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function StatusCard({ type, value, unit, subValue, min, max }) {
-  const icon = type === 'temperature' ? 'thermometer' : 'flash';
-  const title = type === 'temperature' ? 'Nhiệt độ' : 'Tiêu thụ điện';
+const DEFAULT_ICON = 'information-circle-outline';
 
+export default function StatusCard({ title, iconName = DEFAULT_ICON, value, unit, subValue }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
-        <Ionicons name={icon} size={18} color="#6dd3ff" />
+        <Ionicons name={iconName} size={18} color="#6dd3ff" />
       </View>
-      <Text style={styles.value}>{value}<Text style={styles.unit}>{unit}</Text></Text>
-      {subValue && <Text style={styles.sub}>{subValue}</Text>}
+      <Text style={styles.value}>
+        {value}
+        {unit ? <Text style={styles.unit}>{unit}</Text> : null}
+      </Text>
+      {subValue ? <Text style={styles.sub}>{subValue}</Text> : null}
     </View>
   );
 }
@@ -29,10 +31,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   title: {
-    color: '#aaa',
+    color: '#C9CEFF',
     fontSize: 14,
+    fontWeight: '600',
   },
   value: {
     color: '#fff',
@@ -43,6 +47,7 @@ const styles = StyleSheet.create({
   unit: {
     color: '#aaa',
     fontSize: 14,
+    marginLeft: 4,
   },
   sub: {
     color: '#6dd3ff',
